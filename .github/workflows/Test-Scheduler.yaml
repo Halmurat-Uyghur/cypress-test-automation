@@ -68,12 +68,13 @@ jobs:
           if [ "$total_tests" -eq 0 ]; then
             success_rate=0
           else
-            success_rate=$(awk "BEGIN {printf \"%.2f\", ($PASSES/$TOTAL_TESTS)*100}")
+            success_rate=$(awk "BEGIN {printf \"%.2f\", ($passed/$total_tests)*100}")
           fi
           
           echo "$success_rate" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Action Summary
+        if: always()
         run: |
           echo "🔍 **Automated Test Chronicles** 🔍" >> $GITHUB_STEP_SUMMARY
           echo "Behold the saga of our automated tests in vivid detail!" >> $GITHUB_STEP_SUMMARY

@@ -123,7 +123,7 @@ jobs:
 
           echo "Sending this payload to Slack: $SLACK_MESSAGE_PAYLOAD"
 
-          curl -X POST -H 'Content-type: application/json' --data "$SLACK_MESSAGE_PAYLOAD" ${{ secrets.SLACK_WEBHOOK }}
+          curl -X POST -H 'Content-type: application/json' --data "$SLACK_MESSAGE_PAYLOAD" https://hooks.slack.com/services/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
 
       - name: Archive report
         if: always()

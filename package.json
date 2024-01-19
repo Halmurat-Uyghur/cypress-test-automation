@@ -1,0 +1,23 @@
+{
+  "name": "cypress-test-automation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "cy:run": "cypress run",
+    "cy:combine-reports": "mochawesome-merge cypress/report/mocha/*.json > cypress/report/combined-report.json",
+    "cy:generate-report": "marge cypress/report/combined-report.json --reportDir cypress/report --inline",
+    "test": "npm run cy:run || true && npm run cy:combine-reports && npm run cy:generate-report"
+  },
+  "keywords": [
+    "cypress"
+  ],
+  "author": "Halmurat",
+  "license": "ISC",
+  "devDependencies": {
+    "cypress": "^13.6.3",
+    "mochawesome": "^7.1.3",
+    "mochawesome-merge": "^4.3.0",
+    "mochawesome-report-generator": "^6.2.0"
+  }
+}

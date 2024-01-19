@@ -1,0 +1,140 @@
+name: Cypress Tests
+
+on: [push]
+
+env:
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  SLACK_TOKEN: ${{ secrets.SLACK_TOKEN1 }}
+  SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Cypress tests
+        run: npm test
+
+      - name: Archive Mochawesome reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: mochawesome-report
+          path: cypress/reports/
+
+      - name: Fetch Current one Job URL
+        id: url
+        run: |
+          # The current workflow run ID
+          CURRENT_RUN_ID=$GITHUB_RUN_ID
+          echo "Current Run ID: $CURRENT_RUN_ID"
+          
+          # Construct the URL for the current job
+          if [ "$CURRENT_RUN_ID" != "null" -a "$CURRENT_RUN_ID" != "" ]; then
+            CURRENT_JOB_URL="https://github.com/$GITHUB_REPOSITORY/actions/runs/$CURRENT_RUN_ID"
+            echo "current_job_url=$CURRENT_JOB_URL" >> "$GITHUB_OUTPUT"
+            echo "CURRENT_JOB_URL=$CURRENT_JOB_URL" >> "$GITHUB_ENV"
+            echo "Current Job URL: $CURRENT_JOB_URL"
+          
+          else
+            echo "⛔️ Failed to retrieve the current workflow run ID"
+            exit 1
+          fi
+
+      - name: Print info
+        run: |
+          echo "Current job Url ---> ${{ steps.url.outputs.current_job_url }}"
+          echo "CURRENT JOB URL ---> $CURRENT_JOB_URL"
+
+      - name: Print and Use Test Results
+        id: test_results
+        run: |
+          report=$(cat cypress/report/combined-report.json)
+          total_tests=$(echo $report | jq '.stats.tests') >> "$GITHUB_OUTPUT"
+          passed=$(echo $report | jq '.stats.passes') >> "$GITHUB_OUTPUT"
+          failed=$(echo $report | jq '.stats.failures') >> "$GITHUB_OUTPUT"
+          skipped=$(echo $report | jq '.stats.pending') >> "$GITHUB_OUTPUT"
+          
+          echo "Total Tests: $total_tests"
+          echo "Passed: $passed"
+          echo "Failed: $failed"
+          echo "Skipped: $skipped"
+          
+          if [ "$total_tests" -eq 0 ]; then
+            success_rate=0
+          else
+            success_rate=$(awk "BEGIN {printf \"%.2f\", ($PASSES/$TOTAL_TESTS)*100}")
+          fi
+          
+          echo "$success_rate" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Action Summary
+        run: |
+          echo "🔍 **Automated Test Chronicles** 🔍" >> $GITHUB_STEP_SUMMARY
+          echo "Behold the saga of our automated tests in vivid detail!" >> $GITHUB_STEP_SUMMARY
+          echo "| 📊 Test Metrics | 🎯 Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- | " >> $GITHUB_STEP_SUMMARY
+          echo "| 🧮 Total Tests | ${{ steps.test_results.outputs.total }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ✅ Tests Passed | ${{ steps.test_results.outputs.passed }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ❌ Tests Failed | ${{ steps.test_results.outputs.failed }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ⏩ Tests Skipped | ${{ steps.test_results.outputs.skipped }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📈 Success Rate | ${{ steps.test_results.outputs.success_rate }}% |" >> $GITHUB_STEP_SUMMARY
+          
+
+      - name: Slack Message
+        if: always()
+        id: result
+        run: |
+          SLACK_MESSAGE_TEXT="Cypress Test Result"        
+
+          SLACK_MESSAGE_PAYLOAD=$(cat << EOF
+          {
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "$SLACK_MESSAGE_TEXT",
+                  "emoji": true
+                }
+              },
+              {
+                "type": "divider"
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "The <${CURRENT_JOB_URL}|latest test run> has completed. Here are the details:"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "🧪 *Test Suite:* Smoke Test\n\n🔢 *Total Tests:* ${{ steps.test_results.outputs.total }}\n\n✅ *Tests Passed:* ${{ steps.test_results.outputs.passed }}\n\n❌ *Tests Failed:* ${{ steps.test_results.outputs.failed }}\n\n⏩ *Skips:* ${{ steps.test_results.outputs.skipped }}\n\n📈 *Success Rate:* ${{ steps.test_results.outputs.success_rate }}%"
+                }
+              },
+              {
+                "type": "divider"
+              }
+            ]
+          }
+          EOF
+          )
+
+          echo "Sending this payload to Slack: $SLACK_MESSAGE_PAYLOAD"
+
+          curl -X POST -H 'Content-type: application/json' --data "$SLACK_MESSAGE_PAYLOAD" $SLACK_WEBHOOK
+
+      - name: Archive report
+        if: always()
+        uses: actions/upload-artifact@v3.1.3
+        with:
+          name: Mocha report
+          path: cypress/report/combined-report.html

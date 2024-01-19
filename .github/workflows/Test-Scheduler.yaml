@@ -4,7 +4,6 @@ on: [push]
 
 env:
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-  SLACK_TOKEN: ${{ secrets.SLACK_TOKEN1 }}
   SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
 
 jobs:
@@ -68,10 +67,8 @@ jobs:
           if [ "$total_tests" -eq 0 ]; then
             success_rate=0
           else
-            success_rate=$(awk "BEGIN {printf \"%.2f\", ($passed/$total_tests)*100}")
+            success_rate=$(awk "BEGIN {printf \"%.2f\", ($passed/$total_tests)*100}") >> "$GITHUB_OUTPUT"
           fi
-          
-          echo "$success_rate" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Action Summary
         if: always()

@@ -1,3 +1,5 @@
+[![Cypress Tests](https://github.com/Halmurat-Uyghur/cypress-test-automation/actions/workflows/Test-Scheduler.yaml/badge.svg?branch=main)](https://github.com/Halmurat-Uyghur/cypress-test-automation/actions/workflows/Test-Scheduler.yaml)
+
 # Cypress Test Automation
 
 This project is a test automation suite using Cypress.

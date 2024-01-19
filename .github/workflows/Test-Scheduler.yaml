@@ -78,53 +78,6 @@ jobs:
           echo "| ❌ Tests Failed | ${{ steps.test_results.outputs.failed }} |" >> $GITHUB_STEP_SUMMARY
           echo "| ⏩ Tests Skipped | ${{ steps.test_results.outputs.skipped }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 📈 Success Rate | ${{ steps.test_results.outputs.success_rate }}% |" >> $GITHUB_STEP_SUMMARY
-          
-
-      - name: Slack Message
-        if: always()
-        id: result
-        run: |
-          SLACK_MESSAGE_TEXT="Cypress Test Result"        
-
-          SLACK_MESSAGE_PAYLOAD=$(cat << EOF
-          {
-            "blocks": [
-              {
-                "type": "header",
-                "text": {
-                  "type": "plain_text",
-                  "text": "$SLACK_MESSAGE_TEXT",
-                  "emoji": true
-                }
-              },
-              {
-                "type": "divider"
-              },
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "The <${{ steps.url.outputs.current_job_url }}|latest test run> has completed. Here are the details:"
-                }
-              },
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "🧪 *Test Suite:* Smoke Test\n\n🔢 *Total Tests:* ${{ steps.test_results.outputs.total_tests }}\n\n✅ *Tests Passed:* ${{ steps.test_results.outputs.passed }}\n\n❌ *Tests Failed:* ${{ steps.test_results.outputs.failed }}\n\n⏩ *Skips:* ${{ steps.test_results.outputs.skipped }}\n\n📈 *Success Rate:* ${{ steps.test_results.outputs.success_rate }}%"
-                }
-              },
-              {
-                "type": "divider"
-              }
-            ]
-          }
-          EOF
-          )
-
-          echo "Sending this payload to Slack: $SLACK_MESSAGE_PAYLOAD"
-
-          curl -X POST -H 'Content-type: application/json' --data "$SLACK_MESSAGE_PAYLOAD" ${{ secrets.SLACK_WEBHOOK }}
 
       - name: Archive report
         if: always()
@@ -132,3 +85,49 @@ jobs:
         with:
           name: Mocha report
           path: cypress/report/combined-report.html
+
+#      - name: Slack Message
+#        if: always()
+#        id: result
+#        run: |
+#          SLACK_MESSAGE_TEXT="Cypress Test Result"
+#
+#          SLACK_MESSAGE_PAYLOAD=$(cat << EOF
+#          {
+#            "blocks": [
+#              {
+#                "type": "header",
+#                "text": {
+#                  "type": "plain_text",
+#                  "text": "$SLACK_MESSAGE_TEXT",
+#                  "emoji": true
+#                }
+#              },
+#              {
+#                "type": "divider"
+#              },
+#              {
+#                "type": "section",
+#                "text": {
+#                  "type": "mrkdwn",
+#                  "text": "The <${{ steps.url.outputs.current_job_url }}|latest test run> has completed. Here are the details:"
+#                }
+#              },
+#              {
+#                "type": "section",
+#                "text": {
+#                  "type": "mrkdwn",
+#                  "text": "🧪 *Test Suite:* Smoke Test\n\n🔢 *Total Tests:* ${{ steps.test_results.outputs.total_tests }}\n\n✅ *Tests Passed:* ${{ steps.test_results.outputs.passed }}\n\n❌ *Tests Failed:* ${{ steps.test_results.outputs.failed }}\n\n⏩ *Skips:* ${{ steps.test_results.outputs.skipped }}\n\n📈 *Success Rate:* ${{ steps.test_results.outputs.success_rate }}%"
+#                }
+#              },
+#              {
+#                "type": "divider"
+#              }
+#            ]
+#          }
+#          EOF
+#          )
+#
+#          echo "Sending this payload to Slack: $SLACK_MESSAGE_PAYLOAD"
+#
+#          curl -X POST -H 'Content-type: application/json' --data "$SLACK_MESSAGE_PAYLOAD" ${{ secrets.SLACK_WEBHOOK }}

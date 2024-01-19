@@ -10,7 +10,7 @@ describe('Validate Product page', () => {
         homePage = new HomePage();
     });
 
-    it('Visit and verify Test Analytics in Smart Orchestration', () => {
+    it('Visit and verify Test Analytics section', () => {
 
         homePage.visitAndVerify();
         cloudPage = homePage.navigateToProductSmartOrchestration();

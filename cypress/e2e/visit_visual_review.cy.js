@@ -10,7 +10,7 @@ describe('Validate home page', () => {
         homePage = new HomePage();
     });
 
-    it('Visit and check downloads', () => {
+    it('Visit and navigate to Visual reviews section', () => {
 
         homePage.visitAndVerify();
         cloudPage = homePage.navigateToProductVisualReviews();

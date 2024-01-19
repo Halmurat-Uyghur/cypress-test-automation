@@ -1,10 +1,8 @@
 name: Cypress Tests
 
-on: [push]
-
-env:
-  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-  SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+on:
+  push:
+  workflow_dispatch:
 
 jobs:
   cypress-run:
@@ -74,7 +72,7 @@ jobs:
           echo "Behold the saga of our automated tests in vivid detail!" >> $GITHUB_STEP_SUMMARY
           echo "| 📊 Test Metrics | 🎯 Value |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- | " >> $GITHUB_STEP_SUMMARY
-          echo "| 🧮 Total Tests | ${{ steps.test_results.outputs.total }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🧮 Total Tests | ${{ steps.test_results.outputs.total_tests }} |" >> $GITHUB_STEP_SUMMARY
           echo "| ✅ Tests Passed | ${{ steps.test_results.outputs.passed }} |" >> $GITHUB_STEP_SUMMARY
           echo "| ❌ Tests Failed | ${{ steps.test_results.outputs.failed }} |" >> $GITHUB_STEP_SUMMARY
           echo "| ⏩ Tests Skipped | ${{ steps.test_results.outputs.skipped }} |" >> $GITHUB_STEP_SUMMARY
@@ -105,14 +103,14 @@ jobs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "The <${CURRENT_JOB_URL}|latest test run> has completed. Here are the details:"
+                  "text": "The <${{ steps.url.outputs.current_job_url }}|latest test run> has completed. Here are the details:"
                 }
               },
               {
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "🧪 *Test Suite:* Smoke Test\n\n🔢 *Total Tests:* ${{ steps.test_results.outputs.total }}\n\n✅ *Tests Passed:* ${{ steps.test_results.outputs.passed }}\n\n❌ *Tests Failed:* ${{ steps.test_results.outputs.failed }}\n\n⏩ *Skips:* ${{ steps.test_results.outputs.skipped }}\n\n📈 *Success Rate:* ${{ steps.test_results.outputs.success_rate }}%"
+                  "text": "🧪 *Test Suite:* Smoke Test\n\n🔢 *Total Tests:* ${{ steps.test_results.outputs.total_tests }}\n\n✅ *Tests Passed:* ${{ steps.test_results.outputs.passed }}\n\n❌ *Tests Failed:* ${{ steps.test_results.outputs.failed }}\n\n⏩ *Skips:* ${{ steps.test_results.outputs.skipped }}\n\n📈 *Success Rate:* ${{ steps.test_results.outputs.success_rate }}%"
                 }
               },
               {
@@ -125,7 +123,7 @@ jobs:
 
           echo "Sending this payload to Slack: $SLACK_MESSAGE_PAYLOAD"
 
-          curl -X POST -H 'Content-type: application/json' --data "$SLACK_MESSAGE_PAYLOAD" $SLACK_WEBHOOK
+          curl -X POST -H 'Content-type: application/json' --data "$SLACK_MESSAGE_PAYLOAD" ${{ secrets.SLACK_WEBHOOK }}
 
       - name: Archive report
         if: always()

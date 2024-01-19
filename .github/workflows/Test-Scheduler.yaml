@@ -45,10 +45,10 @@ jobs:
         id: test_results
         run: |
           report=$(cat cypress/report/combined-report.json)
-          "total_tests=$(echo $report | jq '.stats.tests')" >> "$GITHUB_OUTPUT"
-          "passed=$(echo $report | jq '.stats.passes')" >> "$GITHUB_OUTPUT"
-          "failed=$(echo $report | jq '.stats.failures')" >> "$GITHUB_OUTPUT"
-          "skipped=$(echo $report | jq '.stats.pending')" >> "$GITHUB_OUTPUT"
+          total_tests=$(echo $report | jq '.stats.tests')
+          passed=$(echo $report | jq '.stats.passes')
+          failed=$(echo $report | jq '.stats.failures')
+          skipped=$(echo $report | jq '.stats.pending')
           
           echo "Total Tests: $total_tests"
           echo "Passed: $passed"
@@ -58,8 +58,14 @@ jobs:
           if [ "$total_tests" -eq 0 ]; then
             success_rate=0
           else
-            "success_rate=$(awk "BEGIN {printf \"%.2f\", ($passed/$total_tests)*100}")" >> "$GITHUB_OUTPUT"
+            success_rate=$(awk "BEGIN {printf \"%.2f\", ($passed/$total_tests)*100}")
           fi
+          
+          echo "total_tests=$total_tests" >> "$GITHUB_OUTPUT"
+          echo "passed=$passed" >> "$GITHUB_OUTPUT"
+          echo "failed=$failed" >> "$GITHUB_OUTPUT"
+          echo "skipped=$skipped" >> "$GITHUB_OUTPUT"
+          echo "success_rate=$success_rate" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Action Summary
         if: always()

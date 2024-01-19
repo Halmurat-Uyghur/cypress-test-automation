@@ -54,10 +54,10 @@ jobs:
         id: test_results
         run: |
           report=$(cat cypress/report/combined-report.json)
-          total_tests=$(echo $report | jq '.stats.tests') >> "$GITHUB_OUTPUT"
-          passed=$(echo $report | jq '.stats.passes') >> "$GITHUB_OUTPUT"
-          failed=$(echo $report | jq '.stats.failures') >> "$GITHUB_OUTPUT"
-          skipped=$(echo $report | jq '.stats.pending') >> "$GITHUB_OUTPUT"
+          total_tests=$(echo $report | jq '.stats.tests') >> $GITHUB_OUTPUT
+          passed=$(echo $report | jq '.stats.passes') >> $GITHUB_OUTPUT
+          failed=$(echo $report | jq '.stats.failures') >> $GITHUB_OUTPUT
+          skipped=$(echo $report | jq '.stats.pending') >> $GITHUB_OUTPUT
           
           echo "Total Tests: $total_tests"
           echo "Passed: $passed"

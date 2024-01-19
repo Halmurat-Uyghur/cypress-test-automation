@@ -20,12 +20,6 @@ jobs:
       - name: Run Cypress tests
         run: npm test
 
-      - name: Archive Mochawesome reports
-        uses: actions/upload-artifact@v2
-        with:
-          name: mochawesome-report
-          path: cypress/reports/
-
       - name: Fetch Current one Job URL
         id: url
         run: |
@@ -37,8 +31,6 @@ jobs:
           if [ "$CURRENT_RUN_ID" != "null" -a "$CURRENT_RUN_ID" != "" ]; then
             CURRENT_JOB_URL="https://github.com/$GITHUB_REPOSITORY/actions/runs/$CURRENT_RUN_ID"
             echo "current_job_url=$CURRENT_JOB_URL" >> "$GITHUB_OUTPUT"
-            echo "CURRENT_JOB_URL=$CURRENT_JOB_URL" >> "$GITHUB_ENV"
-            echo "Current Job URL: $CURRENT_JOB_URL"
           
           else
             echo "⛔️ Failed to retrieve the current workflow run ID"
@@ -48,16 +40,15 @@ jobs:
       - name: Print info
         run: |
           echo "Current job Url ---> ${{ steps.url.outputs.current_job_url }}"
-          echo "CURRENT JOB URL ---> $CURRENT_JOB_URL"
 
       - name: Print and Use Test Results
         id: test_results
         run: |
           report=$(cat cypress/report/combined-report.json)
-          "total_tests=$(echo $report | jq '.stats.tests')" >> $GITHUB_OUTPUT
-          "passed=$(echo $report | jq '.stats.passes')" >> $GITHUB_OUTPUT
-          "failed=$(echo $report | jq '.stats.failures')" >> $GITHUB_OUTPUT
-          "skipped=$(echo $report | jq '.stats.pending')" >> $GITHUB_OUTPUT
+          "total_tests=$(echo $report | jq '.stats.tests')" >> "$GITHUB_OUTPUT"
+          "passed=$(echo $report | jq '.stats.passes')" >> "$GITHUB_OUTPUT"
+          "failed=$(echo $report | jq '.stats.failures')" >> "$GITHUB_OUTPUT"
+          "skipped=$(echo $report | jq '.stats.pending')" >> "$GITHUB_OUTPUT"
           
           echo "Total Tests: $total_tests"
           echo "Passed: $passed"
